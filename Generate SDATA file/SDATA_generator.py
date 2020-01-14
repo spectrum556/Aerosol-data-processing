@@ -1,13 +1,24 @@
+import json
+
 class SDATAGenerator:
     FILE_HEADER = 'SDATA version 2.0'
 
     def __init__(self):
         self.NX = 2
         self.NY = 2
-        self.NZ = 3
+        self.NZ = 30
+
+        self.timestamp_info = self.read_json('timestamp_info.json')
+
+        self.file_data = 'data.json'
+
+    @staticmethod
+    def read_json(file_name):
+        with open(file_name, 'r') as file:
+            return json.load(file)
 
     def cells_str(self):
-        return [Cell().str(iz + 1) for iz in range(self.NZ)]
+        return [Cell(timestamp, self.timestamp_info[timestamp]).str() for timestamp in self.timestamp_info]
 
     def str(self):
         SEGMENT_HEADER = '{}   {}   {}   : NX NY NT'.format(self.NX, self.NY, self.NZ)
@@ -18,24 +29,26 @@ class SDATAGenerator:
 
 
 class Cell:
-    def __init__(self):
-        self.NPIXELS = 4
-        self.TIMESTAMP = '2008-06-14T14:49:28Z'
-        self.HEIGHT_OBS = '70000.0'
-        self.NSURF = 0
-        self.IFGAS = 0
+    def __init__(self, timestamp, info, data):
+        self.TIMESTAMP = timestamp
+
+        self.NPIXELS = info['NPIXELS']
+        self.HEIGHT_OBS = info['HEIGHT_OBS']
+        self.NSURF = info['NSURF']
+        self.IFGAS = info['IFGAS']
 
         self.NX = 2
         self.NY = 2
         self.NZ = 30
 
-    def str(self, iz=None):
+    def str(self):
         CELL_HEADER = '   '.join(str(el) for el in [self.NPIXELS, self.TIMESTAMP, self.HEIGHT_OBS, self.NSURF, self.IFGAS])
-        CELL_HEADER += ' : NPIXELS TIMESTAMP HOBS NSURF IFGAS   {} \n'.format(iz)
+        CELL_HEADER += ' : NPIXELS TIMESTAMP HOBS NSURF IFGAS\n'
         line = CELL_HEADER + '\n'.join(self.pixels_str())
         return line
 
     def pixels_str(self):
+
         return [Pixel(ix + 1, iy + 1, self.NZ).str() for ix in range(self.NX) for iy in range(self.NY)]
 
 
