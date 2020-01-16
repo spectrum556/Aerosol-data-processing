@@ -1,21 +1,37 @@
 import json
 
+
 class SDATAGenerator:
     FILE_HEADER = 'SDATA version 2.0'
 
-    def __init__(self):
-        self.timestamp_info = self.read_json('timestamp_info.json')
+    def __init__(self, timestamp_info_file_name, data_file_name):
+        self.timestamp_info = self.read_json(timestamp_info_file_name)
 
-        self.data = self.read_json('data.json')
+        self.data = self.read_json(data_file_name)
+
+        self.output_file_name = 'SDATA_files/example_{}.sdat'.format(timestamp_info_file_name.split('_')[-1])
 
         self.NX = 2
         self.NY = 2
         self.NZ = len(self.timestamp_info.keys())
 
+        self.result = None
+
+    def run(self, to_file=True):
+        self.result = self.str()
+        print(self.result)
+        if to_file:
+            self.to_file(self.output_file_name, self.result)
+
     @staticmethod
     def read_json(file_name):
         with open(file_name, 'r') as file:
             return json.load(file)
+
+    @staticmethod
+    def to_file(file_name, line):
+        with open(file_name, 'w') as file:
+            file.write(line)
 
     def cells_str(self):
         return [Cell(timestamp, self.timestamp_info[timestamp], self.data[timestamp]).str() for timestamp in self.timestamp_info]
@@ -27,9 +43,6 @@ class SDATAGenerator:
         line += ''.join(cells_lines)
         return line
 
-    def to_file(self, file_name):
-        with open(file_name, 'w') as file:
-            file.write(self.str())
 
 
 
@@ -43,7 +56,6 @@ class Cell:
         self.IFGAS = info['IFGAS']
 
         self.data = data
-
 
     def str(self):
         CELL_HEADER = '   '.join(str(el) for el in [int(self.NPIXELS),
@@ -104,6 +116,7 @@ class Pixel:
 
 
 if __name__ == '__main__':
-    sdata = SDATAGenerator()
-    sdata.to_file('example_polder_encoded.sdat')
-    print(sdata.str()[:100000])
+    sdata = SDATAGenerator(data_file_name='intermediate_data/data_MSIP.json',
+                           timestamp_info_file_name='intermediate_data/timestamp_info_MSIP.json')
+    sdata.run(to_file=True)
+    print(sdata.str())
