@@ -9,7 +9,7 @@ class SDATAGenerator:
 
         self.data = self.read_json(data_file_name)
 
-        self.output_file_name = 'SDATA_files/example_{}.sdat'.format(timestamp_info_file_name.split('_')[-1])
+        self.output_file_name = 'SDATA_files/example_{}.sdat'.format(timestamp_info_file_name.split('_')[-1].split('.')[0])
 
         self.NX = 2
         self.NY = 2
@@ -88,8 +88,9 @@ class Pixel:
                                                           int(self.data['icloudy']),
                                                           int(self.data['icol']),
                                                           int(self.data['irow']),
-                                                          '{:.7f}'.format(round(self.data['x'], 7)),
-                                                          '{:.7f}'.format(round(self.data['y'], 7)),
+
+                                                          '{:.7f}'.format(round(float(self.data['x']), 7)),
+                                                          '{:.7f}'.format(round(float(self.data['y']), 7)),
                                                           "{:10.6f}".format(self.data['MASL']),
                                                           "{:10.6f}".format(self.data['land_percent']),
                                                           int(self.data['nwl'])]])
@@ -116,7 +117,7 @@ class Pixel:
 
 
 if __name__ == '__main__':
-    sdata = SDATAGenerator(data_file_name='intermediate_data/data_MSIP.json',
-                           timestamp_info_file_name='intermediate_data/timestamp_info_MSIP.json')
+    sdata = SDATAGenerator(data_file_name='intermediate_data/data_POLDER_Banizounbou.json',
+                           timestamp_info_file_name='intermediate_data/timestamp_info_POLDER_Banizounbou.json')
     sdata.run(to_file=True)
     print(sdata.str())
